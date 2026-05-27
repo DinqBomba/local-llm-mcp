@@ -81,7 +81,7 @@ Results are deduplicated by URL, relevance-scored (query match in title, Wikiped
 
 ```bash
 cd searxng/
-cp ../.env.example .env
+cp .env.example .env
 ```
 
 Edit `.env` to set the SearXNG version, host bind address, and port. Defaults:
