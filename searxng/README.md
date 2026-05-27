@@ -378,7 +378,7 @@ In your project's `kilo.json` or global config:
 
 ### Wrong tools appear (e.g. `list_searches` instead of `web_search`)
 
-- Those are Open WebUI built-in tools, not from this MCP server
+- Those may be client built-in tools, not from this MCP server
 - Verify the SearXNG tool server is connected in Admin Panel > Integrations
 - Run `test_mcp.py` to confirm the server exposes `web_search` and `web_answer`
 - If it still struggles to find the correct tools refine your system prompt
