@@ -73,8 +73,7 @@ Results are deduplicated by URL, relevance-scored (query match in title, Wikiped
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) with Compose support
-- [Ollama](https://ollama.com) (for the LLM)
-- [Open WebUI](https://github.com/open-webui/open-webui) (or another MCP-compatible client)
+- An MCP-compatible client (see [Connecting to Clients](#connecting-to-clients))
 
 ## Setup
 
@@ -150,9 +149,13 @@ Search result:
 CallToolResult(content=[TextContent(type='text', text='{"query":"linux kernel","results":[...]}', ...)])
 ```
 
-## Connecting to Open WebUI
+## Connecting to Clients
 
-### 5. Add as a Tool Server
+The MCP server listens on `http://localhost:8000/mcp` using the Streamable HTTP transport. FastMCP also exposes a legacy SSE endpoint at `http://localhost:8000/sse` for clients that require it.
+
+### Open WebUI (local Ollama)
+
+#### Add as a Tool Server
 
 In Open WebUI:
 
@@ -168,7 +171,7 @@ http://localhost:8000/mcp
 
 4. Save and verify the connection shows as healthy.
 
-### 6. Enable function calling for your model
+#### Enable function calling for your model
 
 In Open WebUI:
 
@@ -177,7 +180,7 @@ In Open WebUI:
 
 The tools (`web_search`, `web_answer`) will now appear in new chats as available tools.
 
-### 7. Configure the model for tool use (Ollama)
+#### Configure the model for tool use (Ollama)
 
 Models need a large enough context window to hold tool results and conversation history. Create a custom Modelfile:
 
@@ -225,13 +228,133 @@ ollama create gemma4-custom -f gemma4-assistant.Modelfile
 
 Then in Open WebUI, select `gemma4-custom` as your model.
 
-### 8. Test it
+#### Test it
 
 Start a new chat with the model, enable the SearXNG tool, and ask something:
 
 > What is the weather in Sofia today?
 
 The model should call `web_answer` or `web_search`, receive results, and synthesize a response with linked citations.
+
+### Claude Desktop (Anthropic)
+
+Claude Desktop supports local MCP servers via its config file. The server runs entirely on your machine — no data is sent to Anthropic beyond what Claude normally processes.
+
+1. Open (or create) the Claude Desktop config:
+
+| OS | Path |
+|----|------|
+| macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
+| Linux | `~/.config/Claude/claude_desktop_config.json` |
+
+2. Add the SearXNG MCP server:
+
+```json
+{
+  "mcpServers": {
+    "searxng": {
+      "url": "http://localhost:8000/mcp"
+    }
+  }
+}
+```
+
+3. Restart Claude Desktop. The tools will appear as available in new chats.
+
+> **Note:** Claude Desktop uses the Streamable HTTP transport (`/mcp`). If your version requires SSE, use `"url": "http://localhost:8000/sse"` instead.
+
+### Cursor
+
+Cursor supports MCP servers in project or global settings.
+
+1. Open **Settings > MCP**
+2. Click **Add new MCP server**
+3. Configure:
+
+| Field | Value |
+|-------|-------|
+| Name | `searxng` |
+| Type | `streamable-http` |
+| URL | `http://localhost:8000/mcp` |
+
+Or add it directly to `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` (project):
+
+```json
+{
+  "mcpServers": {
+    "searxng": {
+      "url": "http://localhost:8000/mcp"
+    }
+  }
+}
+```
+
+The `web_search` and `web_answer` tools will be available in Cursor's agent mode.
+
+### VS Code (GitHub Copilot, Cline, Continue)
+
+#### GitHub Copilot
+
+In your VS Code `settings.json`:
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "searxng": {
+        "url": "http://localhost:8000/mcp"
+      }
+    }
+  }
+}
+```
+
+Open the Copilot Chat panel, switch to **Agent** mode, and the tools will appear.
+
+#### Cline
+
+1. Open the Cline sidebar
+2. Click the **MCP Servers** icon
+3. Click **Add MCP Server**
+4. Enter the URL: `http://localhost:8000/mcp`
+
+#### Continue
+
+In `~/.continue/config.json`:
+
+```json
+{
+  "experimental": {
+    "modelContextProtocolServers": [
+      {
+        "transport": {
+          "type": "http",
+          "url": "http://localhost:8000/mcp"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Kilo
+
+In your project's `kilo.json` or global config:
+
+```json
+{
+  "mcps": {
+    "searxng": {
+      "url": "http://localhost:8000/mcp"
+    }
+  }
+}
+```
+
+### Cloud-hosted LLMs
+
+> **TODO:** Add instructions for exposing the local MCP server to cloud providers (e.g. Claude API, OpenAI, Gemini) via a reverse proxy or tunnel. Cloud-based LLMs cannot reach `localhost` directly — the MCP server must be exposed publicly (e.g. Cloudflare Tunnel, ngrok, nginx with TLS) and secured with authentication.
 
 ## Troubleshooting
 
