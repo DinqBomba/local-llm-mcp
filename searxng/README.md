@@ -16,6 +16,60 @@ Both tools accept these optional parameters:
 - `time_range` — `day`, `week`, `month`, `year`
 - `limit` — max results to return (default 5, max 50)
 
+## Output Formats
+
+Results are deduplicated by URL, relevance-scored (query match in title, Wikipedia/Github boost), then truncated to `limit`. HTML tags are stripped from all snippets.
+
+### `web_search`
+
+```json
+{
+  "query": "linux kernel",
+  "results": [
+    {
+      "title": "Linux kernel - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Linux_kernel",
+      "snippet": "The Linux kernel is a free and open-source..."
+    }
+  ]
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `query` | `string` | The original search query |
+| `results` | `array` | Ordered list of results (best matches first) |
+| `results[].title` | `string` | Page title |
+| `results[].url` | `string` | Result URL |
+| `results[].snippet` | `string` | Short excerpt from the page (HTML-stripped) |
+
+### `web_answer`
+
+```json
+{
+  "query": "what is rust programming",
+  "results": [
+    {
+      "id": 1,
+      "title": "Rust (programming language) - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Rust_(programming_language)",
+      "snippet": "Rust is a multi-paradigm, general-purpose programming language..."
+    }
+  ],
+  "instructions": "Use results to answer with citations [1]-[n]."
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `query` | `string` | The original search query |
+| `results` | `array` | Ordered list of numbered results |
+| `results[].id` | `integer` | Citation number (`1`–`n`) for inline referencing |
+| `results[].title` | `string` | Page title |
+| `results[].url` | `string` | Result URL |
+| `results[].snippet` | `string` | Short excerpt from the page (HTML-stripped) |
+| `instructions` | `string` | Hardcoded hint: `"Use results to answer with citations [1]-[n]."` |
+
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) with Compose support
