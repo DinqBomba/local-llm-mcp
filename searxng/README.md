@@ -1,6 +1,6 @@
 # SearXNG MCP Server
 
-Exposes [SearXNG](https://github.com/searxng/searxng) web search as MCP tools, running entirely via Docker Compose.
+Exposes [SearXNG](https://github.com/searxng/searxng) web search as MCP tools, running entirely via Docker Compose. Built with FastMCP.
 
 ## Tools
 
